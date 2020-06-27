@@ -35,6 +35,22 @@ function userExist(username) {
   });
 }
 
+function userExist(username) {
+  return new Promise(function (resolve, reject) {
+    daoUser.searchByUsername(username).then((entries) => {
+      entries ? resolve(true) : resolve(false);
+    });
+  });
+}
+
+function userExistID(ID) {
+  return new Promise(function (resolve, reject) {
+    daoUser.searchByID(ID).then((entries) => {
+      entries ? resolve(true) : resolve(false);
+    });
+  });
+}
+
 router.post("/Login", function (req, res, next) {
   const { username, password } = req.body;
   userExist(username).then((exist) => {
@@ -81,6 +97,29 @@ router.post("/AddPull", function (req, res, next) {
   if (sessionData) {
     daoUser.insertPull(sessionData, req.body.comicName).then((response) => {
       res.send({ response: response, comic: req.body.comicName });
+    });
+  }
+});
+
+router.post("/getUsername", function (req, res, next) {
+  sessionData = req.session.user;
+  if (userExistID(sessionData)) {
+    daoUser.getUsername(sessionData).then((username) => {
+      if (username) {
+        console.log(username);
+        res.send(username);
+      } else {
+        res.send(err);
+      }
+    });
+  }
+});
+
+router.post("/getCollection", function (req, res, next) {
+  sessionData = req.session.user;
+  if (userExistID(sessionData)) {
+    daoUser.getCollection(sessionData).then((collection) => {
+      res.send(collection);
     });
   }
 });

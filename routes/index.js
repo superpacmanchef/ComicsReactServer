@@ -8,6 +8,7 @@ let sessionData;
 router.post("/NewComics", function (req, res, next) {
   sessionData = req.session;
   const week = req.body.week;
+  console.log(week);
   let uri;
   if (week == 0) {
     uri = "http://api.shortboxed.com/comics/v1/previous";

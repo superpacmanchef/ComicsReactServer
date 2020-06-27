@@ -76,11 +76,34 @@ class DAO {
   }
 
   getPull(id) {
-    console.log(id);
     return new Promise((resolve, reject) => {
       this.searchByID(id).then((user) => {
         if (user) {
           resolve(user.pullList);
+        } else {
+          resolve([]);
+        }
+      });
+    });
+  }
+
+  getUsername(id) {
+    return new Promise((resolve, reject) => {
+      this.searchByID(id).then((user) => {
+        if (user) {
+          resolve(user.username);
+        } else {
+          resolve([]);
+        }
+      });
+    });
+  }
+
+  getCollection(id) {
+    return new Promise((resolve, reject) => {
+      this.searchByID(id).then((user) => {
+        if (user.collection) {
+          resolve(user.collection);
         } else {
           resolve([]);
         }
