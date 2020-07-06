@@ -31,6 +31,68 @@ class DAO {
       email: email,
       password: password,
       pullList: [],
+      collection: [],
+    });
+  }
+
+  insertCollection(id, comic) {
+    return new Promise((resolve, reject) => {
+      this.searchByID(id).then(() => {
+        this.checkCollection(
+          id,
+          comic.title,
+          comic.issue_number,
+          comic.diamond_id
+        ).then((res) => {
+          if (res == 1) {
+            this.db.update(
+              { _id: id },
+              {
+                $push: { collection: comic },
+              }
+            );
+            resolve(true);
+          } else {
+            resolve(false);
+          }
+        });
+      });
+    });
+  }
+
+  removeCollection(id, comicName, comicIssue) {
+    return new Promise((resolve, reject) => {
+      console.log(comicName);
+      console.log(comicIssue);
+      this.searchByID(id).then(() => {
+        console.log("eyah");
+        this.db.update(
+          { _id: id },
+          {
+            $pull: {
+              collection: { title: comicName, issue_number: comicIssue },
+            },
+          }
+        );
+        resolve(true);
+      });
+    });
+  }
+
+  removePull(id, comicname) {
+    return new Promise((resolve, reject) => {
+      this.searchByID(id).then(() => {
+        console.log(comicname);
+        this.db.update(
+          { _id: id },
+          {
+            $pull: {
+              pullList: comicname,
+            },
+          }
+        );
+        resolve(true);
+      });
     });
   }
 
@@ -110,6 +172,73 @@ class DAO {
       });
     });
   }
-}
 
+  checkCollection(id, comic, issue, comicID) {
+    return new Promise((resolve, reject) => {
+      this.getCollection(id).then((collection) => {
+        let col = 1;
+        for (let x = 0; x < collection.length; x++) {
+          if (
+            collection[x].title
+              .toUpperCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, "")
+              .replace(/THE /g, "")
+              .includes(comic.toUpperCase()) &&
+            collection[x].issue_number == "#" + issue
+          ) {
+            col = 3;
+          } else if (collection[x].diamond_id === comicID) {
+            col = 3;
+          }
+        }
+        resolve(col);
+      });
+    });
+  }
+
+  checkPullList(id, comic) {
+    return new Promise((resolve, reject) => {
+      this.getPull(id).then((pullList) => {
+        let pul = 2;
+        for (let x = 0; x < pullList.length; x++) {
+          console.log(
+            pullList[x]
+              .toUpperCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, "")
+              .replace(/THE /g, "")
+              .replace(/AND /g, "")
+          );
+          console.log(comic);
+          if (
+            pullList[x]
+              .toUpperCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, "")
+              .replace(/THE /g, "")
+              .replace(/AND /g, "")
+              .includes(comic)
+          ) {
+            pul = 4;
+          }
+        }
+        resolve(pul);
+      });
+    });
+  }
+
+  getCollectionComicByID(id, colID) {
+    return new Promise((resolve, reject) => {
+      this.getCollection(id).then((collection) => {
+        let exist = false;
+        collection.map((col) => {
+          console.log(col.id);
+          console.log(colID);
+          if (col.id == colID) {
+            exist = true;
+          }
+        });
+        resolve(exist);
+      });
+    });
+  }
+}
 module.exports = DAO;

@@ -51,6 +51,33 @@ function userExistID(ID) {
   });
 }
 
+function comicTitleSplit(comicTitle) {
+  let comicArr = [];
+  for (let x = 0; x < comicTitle.length; x++) {
+    if (comicTitle[x] === "#") {
+      comicArr.push(comicTitle.substring(0, x - 1));
+      let z = comicTitle.length - x;
+      for (let y = 1; y <= z; y++) {
+        if (comicTitle[x + y] === " " || comicTitle.length === x + y) {
+          comicArr.push(comicTitle.substring(x + 1, x + y));
+        }
+      }
+    }
+  }
+  return comicArr;
+}
+
+router.post("/checkCollection", function (req, res, next) {
+  sessionData = req.session.user;
+  const { comicName, comicId } = req.body;
+  if (sessionData) {
+    const [name, issue] = comicTitleSplit(comicName);
+    daoUser.checkCollection(sessionData, name, issue, comicId).then((resp) => {
+      res.send({ resp });
+    });
+  }
+});
+
 router.post("/Login", function (req, res, next) {
   const { username, password } = req.body;
   userExist(username).then((exist) => {
@@ -120,6 +147,58 @@ router.post("/getCollection", function (req, res, next) {
   if (userExistID(sessionData)) {
     daoUser.getCollection(sessionData).then((collection) => {
       res.send(collection);
+    });
+  }
+});
+
+router.post("/insertCollection", function (req, res, next) {
+  sessionData = req.session.user;
+  const { comic } = req.body;
+  console.log(comic);
+  if (userExistID(sessionData)) {
+    daoUser.insertCollection(sessionData, comic).then(() => {
+      res.send(true);
+    });
+  }
+});
+
+router.post("/removeCollection", function (req, res, next) {
+  sessionData = req.session.user;
+  const { comicName, comicIssue } = req.body;
+  console.log(comicName);
+  console.log(comicIssue);
+  if (userExistID(sessionData)) {
+    daoUser
+      .removeCollection(sessionData, comicName, comicIssue)
+      .then((resp) => {
+        console.log(resp);
+        res.send(true);
+      });
+  }
+});
+
+router.post("/removePull", function (req, res, next) {
+  sessionData = req.session.user;
+  console.log("bums");
+  const { comicName } = req.body;
+  console.log(comicName + "183");
+  if (userExistID(sessionData)) {
+    daoUser.removePull(sessionData, comicName).then((resp) => {
+      console.log(resp);
+      res.send(true);
+    });
+  }
+});
+
+router.post("/checkPull", function (req, res, next) {
+  sessionData = req.session.user;
+  const { comicName } = req.body;
+  const [name, issue] = comicTitleSplit(comicName);
+
+  if (userExistID(sessionData)) {
+    daoUser.checkPullList(sessionData, name).then((resp) => {
+      console.log(resp);
+      res.send({ resp });
     });
   }
 });
