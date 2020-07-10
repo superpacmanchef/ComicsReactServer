@@ -8,7 +8,6 @@ let sessionData;
 router.post("/NewComics", function (req, res, next) {
   sessionData = req.session;
   const week = req.body.week;
-  console.log(week);
   let uri;
   if (week == 0) {
     uri = "http://api.shortboxed.com/comics/v1/previous";
@@ -89,12 +88,12 @@ router.post("/MarvelQuery", function (req, res, next) {
 });
 
 router.post("/ComicVineQuery", function (req, res, next) {
-  const { comicName, comicID } = req.body;
+  const { comicName, comicID , comicTitle , comicDate } = req.body;
   axios
     .get("https://comicvine.gamespot.com/api/search/", {
       params: {
         api_key: "5029328a4eeecde1e6300db0c8649827ae3951ad",
-        query: comicName + " " + comicID,
+        query: comicName + " " + comicID + " " + comicTitle + " " + comicDate,
         format: "json",
         resource_type: "issue",
       },
@@ -107,18 +106,4 @@ router.post("/ComicVineQuery", function (req, res, next) {
 
 module.exports = router;
 
-function comicTitleSplit(comicTitle) {
-  let comicArr = [];
-  for (let x = 0; x < comicTitle.length; x++) {
-    if (comicTitle[x] === "#") {
-      comicArr.push(comicTitle.substring(0, x - 1));
-      let z = comicTitle.length - x;
-      for (let y = 1; y <= z; y++) {
-        if (comicTitle[x + y] === " " || comicTitle.length === x + y) {
-          comicArr.push(comicTitle.substring(x + 1, x + y));
-        }
-      }
-    }
-  }
-  return comicArr;
-}
+

@@ -36,14 +36,18 @@ class DAO {
   }
 
   insertCollection(id, comic) {
+    console.log(comic);
     return new Promise((resolve, reject) => {
+      console.log(comic);
       this.searchByID(id).then(() => {
         this.checkCollection(
           id,
           comic.title,
           comic.issue_number,
-          comic.diamond_id
+          comic.diamond_id,
+          comic.id
         ).then((res) => {
+          console.log(res);
           if (res == 1) {
             this.db.update(
               { _id: id },
@@ -173,25 +177,38 @@ class DAO {
     });
   }
 
-  checkCollection(id, comic, issue, comicID) {
+  checkCollection(id, comic, issue, comicID , comicDID) {
     return new Promise((resolve, reject) => {
       this.getCollection(id).then((collection) => {
+        if(collection){
         let col = 1;
         for (let x = 0; x < collection.length; x++) {
           if (
             collection[x].title
               .toUpperCase()
               .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, "")
-              .replace(/THE /g, "")
+              .replace(/AND /g, "")
               .includes(comic.toUpperCase()) &&
             collection[x].issue_number == "#" + issue
           ) {
+              console.log("bums");
+              col = 3;
+          } else if (comicID) {
+            console.log("arse")
+            if(collection[x].diamond_id === comicID)
             col = 3;
-          } else if (collection[x].diamond_id === comicID) {
-            col = 3;
+          }
+           else if(comicDID){
+             console.log("yes");
+             if(collection[x].id === comicDID){
+              col = 3;
+            }
           }
         }
         resolve(col);
+      }else{
+        reject(1);
+      }
       });
     });
   }
@@ -201,21 +218,13 @@ class DAO {
       this.getPull(id).then((pullList) => {
         let pul = 2;
         for (let x = 0; x < pullList.length; x++) {
-          console.log(
-            pullList[x]
-              .toUpperCase()
-              .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, "")
-              .replace(/THE /g, "")
-              .replace(/AND /g, "")
-          );
-          console.log(comic);
           if (
             pullList[x]
               .toUpperCase()
               .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, "")
-              .replace(/THE /g, "")
               .replace(/AND /g, "")
-              .includes(comic)
+              .replace(/THE /g, "")
+               == comic.replace(/THE /g, "")
           ) {
             pul = 4;
           }
@@ -230,8 +239,6 @@ class DAO {
       this.getCollection(id).then((collection) => {
         let exist = false;
         collection.map((col) => {
-          console.log(col.id);
-          console.log(colID);
           if (col.id == colID) {
             exist = true;
           }
