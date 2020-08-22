@@ -16,7 +16,7 @@ router.post("/NewComics", function (req, res, next) {
   } else if (week == 2) {
     uri = "http://api.shortboxed.com/comics/v1/future";
   } else {
-    res.send("error");
+    res.end("error");
   }
   request({
     uri: uri,
@@ -55,7 +55,7 @@ router.post("/MarvelImg", function (req, res, next) {
       },
     },
     function (err, body) {
-      console.log(body);
+      console.log(body + "58");
 
       if (err) throw err;
       else res.send(body);
@@ -88,7 +88,7 @@ router.post("/MarvelQuery", function (req, res, next) {
 });
 
 router.post("/ComicVineQuery", function (req, res, next) {
-  const { comicName, comicID , comicTitle , comicDate } = req.body;
+  const { comicName, comicID, comicTitle, comicDate } = req.body;
   axios
     .get("https://comicvine.gamespot.com/api/search/", {
       params: {
@@ -105,5 +105,3 @@ router.post("/ComicVineQuery", function (req, res, next) {
 });
 
 module.exports = router;
-
-

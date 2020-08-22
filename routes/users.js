@@ -35,14 +35,6 @@ function userExist(username) {
   });
 }
 
-function userExist(username) {
-  return new Promise(function (resolve, reject) {
-    daoUser.searchByUsername(username).then((entries) => {
-      entries ? resolve(true) : resolve(false);
-    });
-  });
-}
-
 function userExistID(ID) {
   return new Promise(function (resolve, reject) {
     daoUser.searchByID(ID).then((entries) => {
@@ -51,6 +43,7 @@ function userExistID(ID) {
   });
 }
 
+//REDO
 function comicTitleSplit(comicTitle) {
   let comicArr = [];
   for (let x = 0; x < comicTitle.length; x++) {
@@ -179,9 +172,7 @@ router.post("/removeCollection", function (req, res, next) {
 
 router.post("/removePull", function (req, res, next) {
   sessionData = req.session.user;
-  console.log("bums");
   const { comicName } = req.body;
-  console.log(comicName + "183");
   if (userExistID(sessionData)) {
     daoUser.removePull(sessionData, comicName).then((resp) => {
       console.log(resp);
