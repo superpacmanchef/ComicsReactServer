@@ -55,8 +55,6 @@ router.post("/MarvelImg", function (req, res, next) {
       },
     },
     function (err, body) {
-      console.log(body + "58");
-
       if (err) throw err;
       else res.send(body);
     }
