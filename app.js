@@ -2,19 +2,57 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-
+let daoUser = require("./Model/user.js");
 var indexRouter = require("./routes/index");
 var userRouter = require("./routes/users");
+let passport = require("passport");
+var LocalStrategy = require("passport-local").Strategy;
+const bcrypt = require("bcrypt");
 
 var app = express();
 const session = require("express-session");
-app.use(session({ secret: "XASDASDAAA" }));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.set("port", process.env.PORT || 6000);
+
+app.use(session({ secret: "XASDASDAAA" }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+  new LocalStrategy(
+    { usernamefield: "username" },
+    (username, password, done) => {
+      daoUser.searchByUsername(username).then((exist) => {
+        if (exist) {
+          daoUser.searchByUsername(username).then((entry) => {
+            bcrypt.compare(password, entry.password, function (err, result) {
+              if (result) {
+                return done(null, entry);
+              } else {
+                return done(null, false);
+              }
+            });
+          });
+        } else {
+          return done(null, false);
+        }
+      });
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  return done(null, user._id);
+});
+passport.deserializeUser((user, done) => {
+  daoUser.searchByID(user).then((res) => {
+    return done(null, res);
+  });
+});
 
 app.use("/api", indexRouter);
 app.use("/user", userRouter);

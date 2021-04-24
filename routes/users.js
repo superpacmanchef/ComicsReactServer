@@ -1,12 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const dbFileUser = "User.nedb.db";
-const DAOUser = require("../Model/user.js");
-const daoUser = new DAOUser(dbFileUser);
+const daoUser = require("../Model/user.js");
+const passport = require("passport");
 const bcrypt = require("bcrypt");
 const saltRound = 10;
-let sessionData;
-
+const isLoged = require("../middleware/isLoged");
 router.post("/Register", function (req, res, next) {
   const { username, email, password, passwordRepeat } = req.body;
   if (password !== passwordRepeat) {
@@ -35,14 +33,6 @@ function userExist(username) {
   });
 }
 
-function userExistID(ID) {
-  return new Promise(function (resolve, reject) {
-    daoUser.searchByID(ID).then((entries) => {
-      entries ? resolve(true) : resolve(false);
-    });
-  });
-}
-
 //REDO
 function comicTitleSplit(comicTitle) {
   let comicArr = [];
@@ -60,40 +50,20 @@ function comicTitleSplit(comicTitle) {
   return comicArr;
 }
 
-router.post("/checkCollection", function (req, res, next) {
-  sessionData = req.session.user;
+router.post("/checkCollection", [isLoged], function (req, res, next) {
   const { comicName, comicId } = req.body;
-  if (sessionData) {
-    const [name, issue] = comicTitleSplit(comicName);
-    daoUser.checkCollection(sessionData, name, issue, comicId).then((resp) => {
-      res.send({ resp });
-    });
-  }
-});
-
-router.post("/Login", function (req, res, next) {
-  const { username, password } = req.body;
-  userExist(username).then((exist) => {
-    if (exist) {
-      daoUser.searchByUsername(username).then((entry) => {
-        bcrypt.compare(password, entry.password, function (err, result) {
-          if (result) {
-            req.session.user = entry._id;
-            res.send(exist);
-          } else {
-            res.send(false);
-          }
-        });
-      });
-    } else {
-      res.send(exist);
-    }
+  const [name, issue] = comicTitleSplit(comicName);
+  daoUser.checkCollection(req.user._id, name, issue, comicId).then((resp) => {
+    res.send({ resp });
   });
 });
 
+router.post("/Login", passport.authenticate("local"), function (req, res) {
+  res.send(req.isAuthenticated());
+});
+
 router.get("/Loged", function (req, res, next) {
-  sessionData = req.session.user;
-  sessionData ? res.send(true) : res.send(false);
+  res.send(req.isAuthenticated());
 });
 
 router.get("/Logout", function (req, res, next) {
@@ -101,97 +71,62 @@ router.get("/Logout", function (req, res, next) {
   req.session ? res.send(true) : res.send(false);
 });
 
-router.get("/Pull", function (req, res, next) {
-  sessionData = req.session.user;
-  if (sessionData) {
-    daoUser.getPull(sessionData).then((pull) => {
-      res.send(pull);
-    });
-  } else {
-    res.send([]);
-  }
+router.get("/Pull", [isLoged], function (req, res, next) {
+  daoUser.getPull(req.user._id).then((pull) => {
+    res.send(pull);
+  });
 });
 
-router.post("/AddPull", function (req, res, next) {
-  sessionData = req.session.user;
-  if (sessionData) {
-    daoUser.insertPull(sessionData, req.body.comicName).then((response) => {
-      res.send({ response: response, comic: req.body.comicName });
-    });
-  }
+router.post("/AddPull", [isLoged], function (req, res, next) {
+  daoUser.insertPull(req.user._id, req.body.comicName).then((response) => {
+    res.send({ response: response, comic: req.body.comicName });
+  });
 });
 
-router.post("/getUsername", function (req, res, next) {
-  sessionData = req.session.user;
-  if (userExistID(sessionData)) {
-    daoUser.getUsername(sessionData).then((username) => {
-      if (username) {
-        console.log(username);
-        res.send(username);
-      } else {
-        res.send(err);
-      }
-    });
-  }
+router.post("/getUsername", [isLoged], function (req, res, next) {
+  daoUser.getUsername(req.user._id).then((username) => {
+    if (username) {
+      res.send(username);
+    } else {
+      res.send(err);
+    }
+  });
 });
 
-router.post("/getCollection", function (req, res, next) {
-  sessionData = req.session.user;
-  if (userExistID(sessionData)) {
-    daoUser.getCollection(sessionData).then((collection) => {
-      res.send(collection);
-    });
-  }
+router.post("/getCollection", [isLoged], function (req, res, next) {
+  daoUser.getCollection(req.user._id).then((collection) => {
+    res.send(collection);
+  });
 });
 
-router.post("/insertCollection", function (req, res, next) {
-  sessionData = req.session.user;
+router.post("/insertCollection", [isLoged], function (req, res, next) {
   const { comic } = req.body;
-  console.log(comic);
-  if (userExistID(sessionData)) {
-    daoUser.insertCollection(sessionData, comic).then(() => {
-      res.send(true);
-    });
-  }
+  daoUser.insertCollection(req.user._id, comic).then(() => {
+    res.send(true);
+  });
 });
 
-router.post("/removeCollection", function (req, res, next) {
-  sessionData = req.session.user;
+router.post("/removeCollection", [isLoged], function (req, res, next) {
   const { comicName, comicIssue } = req.body;
-  console.log(comicName);
-  console.log(comicIssue);
-  if (userExistID(sessionData)) {
-    daoUser
-      .removeCollection(sessionData, comicName, comicIssue)
-      .then((resp) => {
-        console.log(resp);
-        res.send(true);
-      });
-  }
+  daoUser.removeCollection(req.user._id, comicName, comicIssue).then((resp) => {
+    res.send(true);
+  });
 });
 
-router.post("/removePull", function (req, res, next) {
-  sessionData = req.session.user;
+router.post("/removePull", [isLoged], function (req, res, next) {
   const { comicName } = req.body;
-  if (userExistID(sessionData)) {
-    daoUser.removePull(sessionData, comicName).then((resp) => {
-      console.log(resp);
-      res.send(true);
-    });
-  }
+  daoUser.removePull(req.user._id, comicName).then((resp) => {
+    console.log(resp);
+    res.send(true);
+  });
 });
 
-router.post("/checkPull", function (req, res, next) {
-  sessionData = req.session.user;
+router.post("/checkPull", [isLoged], function (req, res, next) {
   const { comicName } = req.body;
   const [name, issue] = comicTitleSplit(comicName);
-
-  if (userExistID(sessionData)) {
-    daoUser.checkPullList(sessionData, name).then((resp) => {
-      console.log(resp);
-      res.send({ resp });
-    });
-  }
+  daoUser.checkPullList(req.user._id, name).then((resp) => {
+    res.send({ resp });
+  });
 });
 
 module.exports = router;

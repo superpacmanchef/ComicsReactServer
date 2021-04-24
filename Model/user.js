@@ -1,4 +1,5 @@
 const Datastore = require("nedb");
+const dbFileUser = "User.nedb.db";
 
 class DAO {
   constructor(dbfilepath) {
@@ -252,4 +253,6 @@ class DAO {
     });
   }
 }
-module.exports = DAO;
+let dao = new DAO(dbFileUser);
+
+module.exports = dao;
