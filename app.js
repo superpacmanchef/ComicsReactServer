@@ -2,7 +2,7 @@ var express = require("express");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-let daoUser = require("./Model/user.js");
+let daoUser = require("./model/user.js");
 var indexRouter = require("./routes/index");
 var userRouter = require("./routes/users");
 let passport = require("passport");
@@ -53,8 +53,9 @@ passport.deserializeUser((user, done) => {
     return done(null, res);
   });
 });
-
+//Routes for comic book APIs
 app.use("/api", indexRouter);
+//Routes for user actions
 app.use("/user", userRouter);
 
 app.use(function (req, res, next) {

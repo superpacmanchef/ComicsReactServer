@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const daoUser = require("../Model/user.js");
+const daoUser = require("../model/user.js");
 const passport = require("passport");
 const bcrypt = require("bcrypt");
 const saltRound = 10;
-router.post("/Register", function (req, res, next) {
+const isLoged = require("../middlware/isLoged");
+
+router.post("/Register", function (req, res) {
   const { username, email, password, passwordRepeat } = req.body;
   if (password !== passwordRepeat) {
     res.send(2);
@@ -49,7 +51,7 @@ function comicTitleSplit(comicTitle) {
   return comicArr;
 }
 
-router.post("/checkCollection", function (req, res, next) {
+router.post("/checkCollection", isLoged, function (req, res) {
   const { comicName, comicId } = req.body;
   const [name, issue] = comicTitleSplit(comicName);
   daoUser.checkCollection(req.user._id, name, issue, comicId).then((resp) => {
@@ -61,28 +63,28 @@ router.post("/Login", passport.authenticate("local"), function (req, res) {
   res.send(req.isAuthenticated());
 });
 
-router.get("/Loged", function (req, res, next) {
+router.get("/Loged", function (req, res) {
   res.send(req.isAuthenticated());
 });
 
-router.get("/Logout", function (req, res, next) {
+router.get("/Logout", isLoged, function (req, res) {
   req.session.destroy();
   req.session ? res.send(true) : res.send(false);
 });
 
-router.get("/Pull", function (req, res, next) {
+router.get("/Pull", isLoged, function (req, res) {
   daoUser.getPull(req.user._id).then((pull) => {
     res.send(pull);
   });
 });
 
-router.post("/AddPull", function (req, res, next) {
+router.post("/AddPull", isLoged, function (req, res) {
   daoUser.insertPull(req.user._id, req.body.comicName).then((response) => {
     res.send({ response: response, comic: req.body.comicName });
   });
 });
 
-router.post("/getUsername", function (req, res, next) {
+router.post("/getUsername", isLoged, function (req, res) {
   daoUser.getUsername(req.user._id).then((username) => {
     if (username) {
       res.send(username);
@@ -92,27 +94,27 @@ router.post("/getUsername", function (req, res, next) {
   });
 });
 
-router.post("/getC`ollection", function (req, res, next) {
+router.post("/getCollection", isLoged, function (req, res) {
   daoUser.getCollection(req.user._id).then((collection) => {
     res.send(collection);
   });
-})
+});
 
-router.post("/insertCollection", function (req, res, next) {
+router.post("/insertCollection", isLoged, function (req, res) {
   const { comic } = req.body;
   daoUser.insertCollection(req.user._id, comic).then(() => {
     res.send(true);
   });
 });
 
-router.post("/removeCollection", function (req, res, next) {
+router.post("/removeCollection", isLoged, function (req, res) {
   const { comicName, comicIssue } = req.body;
   daoUser.removeCollection(req.user._id, comicName, comicIssue).then((resp) => {
     res.send(true);
   });
 });
 
-router.post("/removePull", function (req, res, next) {
+router.post("/removePull", isLoged, function (req, res) {
   const { comicName } = req.body;
   daoUser.removePull(req.user._id, comicName).then((resp) => {
     console.log(resp);
@@ -120,7 +122,7 @@ router.post("/removePull", function (req, res, next) {
   });
 });
 
-router.post("/checkPull", function (req, res, next) {
+router.post("/checkPull", isLoged, function (req, res) {
   const { comicName } = req.body;
   const [name, issue] = comicTitleSplit(comicName);
   daoUser.checkPullList(req.user._id, name).then((resp) => {

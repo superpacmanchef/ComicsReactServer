@@ -64,10 +64,7 @@ class DAO {
 
   removeCollection(id, comicName, comicIssue) {
     return new Promise((resolve, reject) => {
-      console.log(comicName);
-      console.log(comicIssue);
       this.searchByID(id).then(() => {
-        console.log("eyah");
         this.db.update(
           { _id: id },
           {
