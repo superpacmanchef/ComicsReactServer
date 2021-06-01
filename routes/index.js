@@ -55,8 +55,9 @@ router.post("/MarvelImg", function (req, res, next) {
       },
     },
     function (err, body) {
-      if (err) throw err;
-      else res.send(body);
+      if (err) {
+        console.log(err);
+      } else res.send(body);
     }
   );
 });
@@ -91,7 +92,15 @@ router.post("/ComicVineQuery", function (req, res, next) {
     .get("https://comicvine.gamespot.com/api/search/", {
       params: {
         api_key: "5029328a4eeecde1e6300db0c8649827ae3951ad",
-        query: comicName + " " + comicID + " " + comicTitle + " " + comicDate,
+        query:
+          comicName +
+          " " +
+          comicID +
+          " " +
+          comicTitle +
+          " " +
+          comicDate +
+          " comic",
         format: "json",
         resource_type: "issue",
       },
