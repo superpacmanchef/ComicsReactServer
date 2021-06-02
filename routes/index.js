@@ -4,9 +4,7 @@ var request = require("request");
 var mahvel = require("marvel-comics-api");
 const axios = require("axios");
 
-let sessionData;
-router.post("/NewComics", function (req, res, next) {
-  sessionData = req.session;
+router.post("/NewComics", async function (req, res, next) {
   const week = req.body.week;
   let uri;
   if (week == 0) {
@@ -111,4 +109,66 @@ router.post("/ComicVineQuery", function (req, res, next) {
     .catch();
 });
 
+router.get("/marvelComics", async (req, res) => {
+  const marvelDiamondIDs = await filterMarvelDiamondIDs(req.query.offset);
+  Promise.all(
+    marvelDiamondIDs.map(async (diamondID) => {
+      const c = await marvelApiComicQuery(diamondID);
+      console.log(c);
+      return c;
+    })
+  ).then((comics) => {
+    res.send(comics);
+  });
+});
+
+const marvelApiComicQuery = (diamondID) => {
+  const baseUrl = "http://gateway.marvel.com/v1/public/comics";
+  const query = "?diamondCode=" + diamondID;
+  const timestamp = new Date().getTime();
+  const hash = crypto
+    .createHash("md5")
+    .update(
+      timestamp +
+        "d0a896174fe2c66fd9b24c8137c4a0bf876c6995" +
+        "6ff4f2199ec8f6b99862b84ba134b59a"
+    )
+    .digest("hex");
+  const auth = `&ts=${timestamp}&apikey=${"6ff4f2199ec8f6b99862b84ba134b59a"}&hash=${hash}`;
+  const url = `${baseUrl}${query}${auth}`;
+
+  return axios.get(url).then((comics) => {
+    if (parseInt(comics.data.data.total) > 0) {
+      return comics.data.data.results[0];
+    } else {
+      return null;
+    }
+  });
+};
+
+const filterMarvelDiamondIDs = async (offset) => {
+  const comicData = await getPreviewData(offset);
+  const lines = comicData.split("\r\n");
+  let i = 0;
+  while (lines[i] != "MARVEL COMICS") {
+    i++;
+  }
+  i += 2;
+  const diamondIDS = [];
+  while (lines[i] != "") {
+    diamondIDS.push(lines[i].substring(0, 9));
+    i++;
+  }
+  return diamondIDS;
+};
+
+const getPreviewData = (off) => {
+  const uri =
+    "https://www.previewsworld.com/NewReleases/Export?format=txt&releaseDate=";
+  var today = new Date();
+  today.setDate(today.getDate() + off + ((3 - 1 - today.getDay() + 7) % 7) + 1);
+  return axios.get(uri + today).then((previewData) => {
+    return previewData.data;
+  });
+};
 module.exports = router;
