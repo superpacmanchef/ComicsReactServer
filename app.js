@@ -23,26 +23,23 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(
-  new LocalStrategy(
-    { usernamefield: "username" },
-    (username, password, done) => {
-      daoUser.searchByUsername(username).then((exist) => {
-        if (exist) {
-          daoUser.searchByUsername(username).then((entry) => {
-            bcrypt.compare(password, entry.password, function (err, result) {
-              if (result) {
-                return done(null, entry);
-              } else {
-                return done(null, false);
-              }
-            });
+  new LocalStrategy((username, password, done) => {
+    daoUser.searchByUsername(username).then((exist) => {
+      if (exist) {
+        daoUser.searchByUsername(username).then((entry) => {
+          bcrypt.compare(password, entry.password, function (err, result) {
+            if (result) {
+              return done(null, entry);
+            } else {
+              return done(null, false);
+            }
           });
-        } else {
-          return done(null, false);
-        }
-      });
-    }
-  )
+        });
+      } else {
+        return done(null, false);
+      }
+    });
+  })
 );
 
 passport.serializeUser((user, done) => {
