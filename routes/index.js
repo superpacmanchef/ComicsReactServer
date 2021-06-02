@@ -1,10 +1,11 @@
 var express = require("express");
 var router = express.Router();
 var request = require("request");
-var mahvel = require("marvel-comics-api");
 const axios = require("axios");
+var mahvel = require("marvel-comics-api");
+const crypto = require("crypto");
 
-router.post("/NewComics", async function (req, res, next) {
+router.post("/NewComics", function (req, res, next) {
   const week = req.body.week;
   let uri;
   if (week == 0) {
@@ -16,6 +17,7 @@ router.post("/NewComics", async function (req, res, next) {
   } else {
     res.end("error");
   }
+
   request({
     uri: uri,
   }).pipe(res);
