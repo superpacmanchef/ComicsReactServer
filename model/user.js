@@ -46,6 +46,7 @@ class DAO {
           comic.diamond_id,
           comic.id
         ).then((res) => {
+          console.log(res);
           if (res == 1) {
             this.db.update(
               { _id: id },
@@ -209,7 +210,7 @@ class DAO {
           }
           resolve(col);
         } else {
-          reject(1);
+          resolve(1);
         }
       });
     });

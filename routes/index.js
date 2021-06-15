@@ -1,11 +1,10 @@
 var express = require("express");
 var router = express.Router();
-var request = require("request");
 const axios = require("axios");
 var mahvel = require("marvel-comics-api");
 const crypto = require("crypto");
 
-router.post("/NewComics", function (req, res, next) {
+router.post("/NewComics", async function (req, res, next) {
   const week = req.body.week;
   let uri;
   if (week == 0) {
@@ -18,9 +17,25 @@ router.post("/NewComics", function (req, res, next) {
     res.end("error");
   }
 
-  request({
-    uri: uri,
-  }).pipe(res);
+  const shortboxed = await axios.get(uri);
+  // const marvelDiamondIDs = await filterMarvelDiamondIDs(req.query.offset);
+
+  //INFO: GET RID DO NULLS in marvel AND ONLY IN CASE of hsortboxed no longer working
+  // Promise.all(
+  //   marvelDiamondIDs.map(async (diamondID) => {
+  //     const c = await marvelApiComicQuery(diamondID);
+  //     return c;
+  //   })
+  // ).then((comics) => {
+  //   console.log(shortboxed);
+  //   res.send([...comics, ...shortboxed.data.comics]);
+  // });
+
+  if (shortboxed.status == 200) {
+    res.send(shortboxed.data);
+  } else {
+    res.sendStatus(400);
+  }
 });
 
 router.post("/ComicImg", function (req, res, next) {
@@ -116,7 +131,6 @@ router.get("/marvelComics", async (req, res) => {
   Promise.all(
     marvelDiamondIDs.map(async (diamondID) => {
       const c = await marvelApiComicQuery(diamondID);
-      console.log(c);
       return c;
     })
   ).then((comics) => {
@@ -140,7 +154,7 @@ const marvelApiComicQuery = (diamondID) => {
   const url = `${baseUrl}${query}${auth}`;
 
   return axios.get(url).then((comics) => {
-    if (parseInt(comics.data.data.total) > 0) {
+    if (comics.data.data.total > 0) {
       return comics.data.data.results[0];
     } else {
       return null;
@@ -164,13 +178,12 @@ const filterMarvelDiamondIDs = async (offset) => {
   return diamondIDS;
 };
 
-const getPreviewData = (off) => {
+const getPreviewData = async (off) => {
   const uri =
     "https://www.previewsworld.com/NewReleases/Export?format=txt&releaseDate=";
   var today = new Date();
   today.setDate(today.getDate() + off + ((3 - 1 - today.getDay() + 7) % 7) + 1);
-  return axios.get(uri + today).then((previewData) => {
-    return previewData.data;
-  });
+  let previewRes = await axios.get(uri + today);
+  return previewRes.data;
 };
 module.exports = router;
