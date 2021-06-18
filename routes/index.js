@@ -3,6 +3,7 @@ var router = express.Router();
 const axios = require("axios");
 var mahvel = require("marvel-comics-api");
 const crypto = require("crypto");
+const Keys = require("../keys");
 
 router.post("/NewComics", async function (req, res, next) {
   const week = req.body.week;
@@ -42,7 +43,7 @@ router.post("/ComicImg", function (req, res, next) {
   axios
     .get("https://comicvine.gamespot.com/api/search/", {
       params: {
-        api_key: "5029328a4eeecde1e6300db0c8649827ae3951ad",
+        api_key: Keys.COMIC_VINE_KEY,
         query: req.body.comicName + " " + req.body.comicID,
         format: "json",
         resource_type: "issue",
@@ -144,13 +145,9 @@ const marvelApiComicQuery = (diamondID) => {
   const timestamp = new Date().getTime();
   const hash = crypto
     .createHash("md5")
-    .update(
-      timestamp +
-        "d0a896174fe2c66fd9b24c8137c4a0bf876c6995" +
-        "6ff4f2199ec8f6b99862b84ba134b59a"
-    )
+    .update(timestamp + Keys.MARVEL_KEY_LONG + Keys.MARVEL_KEY_SHORT)
     .digest("hex");
-  const auth = `&ts=${timestamp}&apikey=${"6ff4f2199ec8f6b99862b84ba134b59a"}&hash=${hash}`;
+  const auth = `&ts=${timestamp}&apikey=${Keys.MARVEL_KEY_SHORT}&hash=${hash}`;
   const url = `${baseUrl}${query}${auth}`;
 
   return axios.get(url).then((comics) => {
