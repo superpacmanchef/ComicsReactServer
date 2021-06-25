@@ -1,22 +1,27 @@
-const Datastore = require("nedb");
-const dbFileUser = "User.nedb.db";
-const MongoClient = require('mongodb').MongoClient
+const Datastore = require('nedb');
+const dbFileUser = 'User.nedb.db';
+const MongoClient = require('mongodb').MongoClient;
+const { MONGOLINK } = require('keys');
 class DAO {
   constructor(dbfilepath) {
-  //   if (dbfilepath) {
-  //     this.db = new Datastore({ filename: dbfilepath, autoload: true });
-  //     console.log("\n>>>>> DB connected to file: ", dbfilepath);
-  //   } else {
-  //     //in memory
-  //     this.db = new Datastore();
-  //   }
-   const connectionString = "mongodb+srv://dbUser:pacman123@comicsreactserver.hgt2s.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
-   MongoClient.connect(connectionString, { useUnifiedTopology: true } ,(err, client) => {
-    if (err) return console.error(err)
-    console.log('Connected to Database')
-     this.db = client.db("comic-react-server");
-  })
-   }
+    //   if (dbfilepath) {
+    //     this.db = new Datastore({ filename: dbfilepath, autoload: true });
+    //     console.log("\n>>>>> DB connected to file: ", dbfilepath);
+    //   } else {
+    //     //in memory
+    //     this.db = new Datastore();
+    //   }
+    const connectionString = MONGOLINK;
+    MongoClient.connect(
+      connectionString,
+      { useUnifiedTopology: true },
+      (err, client) => {
+        if (err) return console.error(err);
+        console.log('Connected to Database');
+        this.db = client.db('comic-react-server');
+      },
+    );
+  }
 
   all() {
     return new Promise((resolve, response) => {
@@ -26,14 +31,14 @@ class DAO {
           console.log(`error ${err}`);
         } else {
           resolve(entries);
-          console.log("resolved");
+          console.log('resolved');
         }
       });
     });
   }
 
   insertUser(username, email, password) {
-    this.db.collection("users").insertOne({
+    this.db.collection('users').insertOne({
       username: username,
       email: email,
       password: password,
@@ -50,7 +55,7 @@ class DAO {
           comic.title,
           comic.issue_number,
           comic.diamond_id,
-          comic.id
+          comic.id,
         ).then((res) => {
           console.log(res);
           if (res == 1) {
@@ -58,7 +63,7 @@ class DAO {
               { _id: id },
               {
                 $push: { collection: comic },
-              }
+              },
             );
             resolve(true);
           } else {
@@ -80,7 +85,7 @@ class DAO {
             $pull: {
               collection: { title: comicName, issue_number: comicIssue },
             },
-          }
+          },
         );
         resolve(true);
       });
@@ -96,7 +101,7 @@ class DAO {
             $pull: {
               pullList: comicname,
             },
-          }
+          },
         );
         resolve(true);
       });
@@ -104,21 +109,24 @@ class DAO {
   }
 
   searchByUsername(username) {
-      return this.db.collection("users").find({ username: username }).toArray().then( (entries) => {
-
-          console.log(entries);
-          return (entries);
-      
-      }).catch((err) => console.log(err))
+    return this.db
+      .collection('users')
+      .find({ username: username })
+      .toArray()
+      .then((entries) => {
+        console.log(entries);
+        return entries;
+      })
+      .catch((err) => console.log(err));
   }
 
   searchByID(id) {
     return new Promise((resolve, reject) => {
-      this.db.collection("users").find({ _id: id }, function (err, entries) {
+      this.db.collection('users').find({ _id: id }, function (err, entries) {
         if (err) {
           reject(err);
         } else {
-          console.log("bums")
+          console.log('bums');
           resolve(entries);
         }
       });
@@ -135,7 +143,7 @@ class DAO {
             {},
             function () {
               resolve(true);
-            }
+            },
           );
         }
       });
@@ -167,7 +175,7 @@ class DAO {
   }
 
   getCollection(id) {
-    console.log("bums");
+    console.log('bums');
     return new Promise((resolve, reject) => {
       this.searchByID(id).then((user) => {
         if (user.collection) {
@@ -192,10 +200,10 @@ class DAO {
               if (
                 collection[x].title
                   .toUpperCase()
-                  .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, "")
-                  .replace(/AND /g, "")
+                  .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, '')
+                  .replace(/AND /g, '')
                   .includes(comic.toUpperCase()) &&
-                collection[x].issue_number == "#" + issue &&
+                collection[x].issue_number == '#' + issue &&
                 comic
               ) {
                 col = 3;
@@ -229,9 +237,9 @@ class DAO {
             if (
               pullList[x]
                 .toUpperCase()
-                .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, "")
-                .replace(/AND /g, "")
-                .replace(/THE /g, "") == comic.replace(/THE /g, "")
+                .replace(/[.,\/#!$%\^&\*;:{}=\_`~()]/g, '')
+                .replace(/AND /g, '')
+                .replace(/THE /g, '') == comic.replace(/THE /g, '')
             ) {
               pul = 4;
             }
