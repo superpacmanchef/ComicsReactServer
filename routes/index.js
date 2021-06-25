@@ -17,8 +17,13 @@ router.post("/NewComics", async function (req, res, next) {
   } else {
     res.end("error");
   }
-
-  const shortboxed = await axios.get(uri);
+  let shortboxed = {status : null};
+  try{
+   shortboxed = await axios.get(uri);
+  }catch(error)
+  {
+    console.log("error")
+  }
   // const marvelDiamondIDs = await filterMarvelDiamondIDs(req.query.offset);
 
   //INFO: GET RID DO NULLS in marvel AND ONLY IN CASE of hsortboxed no longer working

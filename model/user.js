@@ -1,16 +1,22 @@
 const Datastore = require("nedb");
 const dbFileUser = "User.nedb.db";
-
+const MongoClient = require('mongodb').MongoClient
 class DAO {
   constructor(dbfilepath) {
-    if (dbfilepath) {
-      this.db = new Datastore({ filename: dbfilepath, autoload: true });
-      console.log("\n>>>>> DB connected to file: ", dbfilepath);
-    } else {
-      //in memory
-      this.db = new Datastore();
-    }
-  }
+  //   if (dbfilepath) {
+  //     this.db = new Datastore({ filename: dbfilepath, autoload: true });
+  //     console.log("\n>>>>> DB connected to file: ", dbfilepath);
+  //   } else {
+  //     //in memory
+  //     this.db = new Datastore();
+  //   }
+   const connectionString = "mongodb+srv://dbUser:pacman123@comicsreactserver.hgt2s.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+   MongoClient.connect(connectionString, { useUnifiedTopology: true } ,(err, client) => {
+    if (err) return console.error(err)
+    console.log('Connected to Database')
+     this.db = client.db("comic-react-server");
+  })
+   }
 
   all() {
     return new Promise((resolve, response) => {
@@ -27,7 +33,7 @@ class DAO {
   }
 
   insertUser(username, email, password) {
-    this.db.insert({
+    this.db.collection("users").insertOne({
       username: username,
       email: email,
       password: password,
@@ -98,23 +104,21 @@ class DAO {
   }
 
   searchByUsername(username) {
-    return new Promise((resolve, reject) => {
-      this.db.findOne({ username: username }, function (err, entries) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(entries);
-        }
-      });
-    });
+      return this.db.collection("users").find({ username: username }).toArray().then( (entries) => {
+
+          console.log(entries);
+          return (entries);
+      
+      }).catch((err) => console.log(err))
   }
 
   searchByID(id) {
     return new Promise((resolve, reject) => {
-      this.db.findOne({ _id: id }, function (err, entries) {
+      this.db.collection("users").find({ _id: id }, function (err, entries) {
         if (err) {
           reject(err);
         } else {
+          console.log("bums")
           resolve(entries);
         }
       });

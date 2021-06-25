@@ -29,7 +29,8 @@ router.post("/Register", function (req, res) {
 function userExist(username) {
   return new Promise(function (resolve, reject) {
     daoUser.searchByUsername(username).then((entries) => {
-      entries ? resolve(true) : resolve(false);
+      console.log(entries)
+      entries.length !== 0  ? resolve(true) : resolve(false);
     });
   });
 }
@@ -64,6 +65,7 @@ router.post("/Login", passport.authenticate("local"), function (req, res) {
 });
 
 router.get("/Loged", function (req, res) {
+  console.log("bums")
   console.log(req.isAuthenticated());
   res.send(req.isAuthenticated());
 });

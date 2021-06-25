@@ -27,7 +27,7 @@ passport.use(
     daoUser.searchByUsername(username).then((exist) => {
       if (exist) {
         daoUser.searchByUsername(username).then((entry) => {
-          bcrypt.compare(password, entry.password, function (err, result) {
+          bcrypt.compare(password, entry[0].password, function (err, result) {
             if (result) {
               return done(null, entry);
             } else {
@@ -43,7 +43,7 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
-  return done(null, user._id);
+  return done(null, user[0]._id);
 });
 passport.deserializeUser((user, done) => {
   daoUser.searchByID(user).then((res) => {
