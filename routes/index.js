@@ -64,8 +64,8 @@ router.post('/MarvelImg', function (req, res, next) {
   mahvel(
     'comics',
     {
-      publicKey: '6ff4f2199ec8f6b99862b84ba134b59a',
-      privateKey: 'd0a896174fe2c66fd9b24c8137c4a0bf876c6995',
+      publicKey: Keys.MARVEL_KEY_SHORT,
+      privateKey: Keys.MARVEL_KEY_LONG,
       timeout: 4000,
       query: {
         limit: 5,
@@ -87,8 +87,8 @@ router.post('/MarvelQuery', function (req, res, next) {
   mahvel(
     'comics',
     {
-      publicKey: '6ff4f2199ec8f6b99862b84ba134b59a',
-      privateKey: 'd0a896174fe2c66fd9b24c8137c4a0bf876c6995',
+      publicKey: Keys.MARVEL_KEY_SHORT,
+      privateKey: Keys.MARVEL_KEY_LONG,
       timeout: 4000,
       query: {
         limit: 5,
@@ -109,7 +109,7 @@ router.post('/ComicVineQuery', function (req, res, next) {
   axios
     .get('https://comicvine.gamespot.com/api/search/', {
       params: {
-        api_key: '5029328a4eeecde1e6300db0c8649827ae3951ad',
+        api_key: Keys.COMIC_VINE_KEY,
         query:
           comicName +
           ' ' +
