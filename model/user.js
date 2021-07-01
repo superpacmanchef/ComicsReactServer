@@ -1,7 +1,5 @@
-const Datastore = require('nedb');
-const dbFileUser = 'User.nedb.db';
-const { MongoClient, ObjectID } = require('mongodb');
-const Keys = require('../keys');
+const { MongoClient, ObjectID } = require('mongodb')
+const Keys = require('../keys')
 class DAO {
   constructor() {
     //   if (dbfilepath) {
@@ -11,16 +9,16 @@ class DAO {
     //     //in memory
     //     this.db = new Datastore();
     //   }
-    const connectionString = Keys.MONGOLINK;
+    const connectionString = Keys.MONGOLINK
     MongoClient.connect(
       connectionString,
       { useUnifiedTopology: true },
       (err, client) => {
-        if (err) return console.error(err);
-        console.log('Connected to Database');
-        this.db = client.db('comic-react-server');
-      },
-    );
+        if (err) return console.error(err)
+        console.log('Connected to Database')
+        this.db = client.db('comic-react-server')
+      }
+    )
   }
 
   /* 
@@ -45,8 +43,8 @@ class DAO {
       email: email,
       password: password,
       pullList: [],
-      collection: [],
-    });
+      collection: []
+    })
   }
 
   insertCollection(id, comic) {
@@ -56,21 +54,21 @@ class DAO {
         comic.title,
         comic.issue_number,
         comic.diamond_id,
-        comic.id,
+        comic.id
       ).then((res) => {
         if (res == 1) {
           this.db.collection('users').updateOne(
             { _id: id },
             {
-              $push: { collection: comic },
-            },
-          );
-          resolve(true);
+              $push: { collection: comic }
+            }
+          )
+          resolve(true)
         } else {
-          resolve(false);
+          resolve(false)
         }
-      });
-    });
+      })
+    })
   }
 
   removeCollection(id, comicName, comicIssue) {
@@ -79,12 +77,12 @@ class DAO {
         { _id: id },
         {
           $pull: {
-            collection: { title: comicName, issue_number: comicIssue },
-          },
-        },
-      );
-      resolve(true);
-    });
+            collection: { title: comicName, issue_number: comicIssue }
+          }
+        }
+      )
+      resolve(true)
+    })
   }
 
   removePull(id, comicname) {
@@ -93,12 +91,12 @@ class DAO {
         { _id: id },
         {
           $pull: {
-            pullList: comicname,
-          },
-        },
-      );
-      resolve(true);
-    });
+            pullList: comicname
+          }
+        }
+      )
+      resolve(true)
+    })
   }
 
   searchByUsername(username) {
@@ -106,9 +104,9 @@ class DAO {
       .collection('users')
       .findOne({ username: username })
       .then((entries) => {
-        return entries;
+        return entries
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
   }
 
   searchByID(id) {
@@ -116,9 +114,9 @@ class DAO {
       .collection('users')
       .findOne({ _id: ObjectID(id) })
       .then((entries) => {
-        return entries;
+        return entries
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
   }
 
   insertPull(id, comic) {
@@ -130,10 +128,10 @@ class DAO {
           { $push: { pullList: comic } },
           {},
           function () {
-            resolve(true);
-          },
-        );
-    });
+            resolve(true)
+          }
+        )
+    })
   }
 
   getPull(id) {
@@ -142,9 +140,9 @@ class DAO {
         .collection('users')
         .findOne({ _id: ObjectID(id) }, { projection: { pullList: 1 } })
         .then((res) => {
-          resolve(res.pullList);
-        });
-    });
+          resolve(res.pullList)
+        })
+    })
   }
 
   getUsername(id) {
@@ -153,9 +151,9 @@ class DAO {
         .collection('users')
         .findOne({ _id: ObjectID(id) }, { projection: { username: 1 } })
         .then((res) => {
-          resolve(res.username);
-        });
-    });
+          resolve(res.username)
+        })
+    })
   }
   getCollection(id) {
     return new Promise((resolve, reject) => {
@@ -163,21 +161,21 @@ class DAO {
         .collection('users')
         .findOne({ _id: ObjectID(id) }, { projection: { collection: 1 } })
         .then((res) => {
-          resolve(res.collection);
-        });
-    });
+          resolve(res.collection)
+        })
+    })
   }
 
   //TODO : Make this less of a mess
   checkCollection(id, comic, issue, comicID, comicDID) {
     return new Promise((resolve, reject) => {
       this.getCollection(id).then((collection) => {
-        let col = 1;
+        let col = 1
         if (collection) {
           for (let x = 0; x < collection.length; x++) {
             if (comic) {
               if (col === 3) {
-                break;
+                break
               }
               if (
                 collection[x].title
@@ -188,32 +186,32 @@ class DAO {
                 collection[x].issue_number == '#' + issue &&
                 comic
               ) {
-                col = 3;
+                col = 3
               } else if (comicID) {
                 if (collection[x].diamond_id === comicID) {
-                  col = 3;
+                  col = 3
                 }
               } else if (comicDID) {
                 if (collection[x].id === comicDID) {
-                  col = 3;
+                  col = 3
                 }
               }
             } else {
-              col = 0;
+              col = 0
             }
           }
-          resolve(col);
+          resolve(col)
         } else {
-          resolve(1);
+          resolve(1)
         }
-      });
-    });
+      })
+    })
   }
 
   checkPullList(id, comic) {
     return new Promise((resolve, reject) => {
       this.getPull(id).then((pullList) => {
-        let pul = 2;
+        let pul = 2
         for (let x = 0; x < pullList.length; x++) {
           if (comic) {
             if (
@@ -223,31 +221,31 @@ class DAO {
                 .replace(/AND /g, '')
                 .replace(/THE /g, '') == comic.replace(/THE /g, '')
             ) {
-              pul = 4;
+              pul = 4
             }
           } else {
-            pul = 0;
+            pul = 0
           }
         }
-        resolve(pul);
-      });
-    });
+        resolve(pul)
+      })
+    })
   }
 
   getCollectionComicByID(id, colID) {
     return new Promise((resolve, reject) => {
       this.getCollection(id).then((collection) => {
-        let exist = false;
+        let exist = false
         collection.map((col) => {
           if (col.id == colID) {
-            exist = true;
+            exist = true
           }
-        });
-        resolve(exist);
-      });
-    });
+        })
+        resolve(exist)
+      })
+    })
   }
 }
-let dao = new DAO(dbFileUser);
+let dao = new DAO()
 
-module.exports = dao;
+module.exports = dao

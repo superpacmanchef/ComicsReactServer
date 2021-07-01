@@ -1,27 +1,26 @@
-var express = require('express');
-var router = express.Router();
-const axios = require('axios');
-var mahvel = require('marvel-comics-api');
-const crypto = require('crypto');
-const Keys = require('../keys');
+var express = require('express')
+var router = express.Router()
+const axios = require('axios')
+const crypto = require('crypto')
+const Keys = require('../keys')
 
 router.post('/NewComics', async function (req, res, next) {
-  const week = req.body.week;
-  let uri;
+  const week = req.body.week
+  let uri
   if (week == 0) {
-    uri = 'http://api.shortboxed.com/comics/v1/previous';
+    uri = 'http://api.shortboxed.com/comics/v1/previous'
   } else if (week == 1) {
-    uri = 'http://api.shortboxed.com/comics/v1/new';
+    uri = 'http://api.shortboxed.com/comics/v1/new'
   } else if (week == 2) {
-    uri = 'http://api.shortboxed.com/comics/v1/future';
+    uri = 'http://api.shortboxed.com/comics/v1/future'
   } else {
-    res.end('error');
+    res.end('error')
   }
-  let shortboxed = { status: null };
+  let shortboxed = { status: null }
   try {
-    shortboxed = await axios.get(uri);
+    shortboxed = await axios.get(uri)
   } catch (error) {
-    console.log('error');
+    console.log('error')
   }
   // const marvelDiamondIDs = await filterMarvelDiamondIDs(req.query.offset);
 
@@ -37,11 +36,11 @@ router.post('/NewComics', async function (req, res, next) {
   // });
 
   if (shortboxed.status == 200) {
-    res.send(shortboxed.data);
+    res.send(shortboxed.data)
   } else {
-    res.sendStatus(400);
+    res.sendStatus(400)
   }
-});
+})
 
 router.post('/ComicImg', function (req, res, next) {
   axios
@@ -50,17 +49,17 @@ router.post('/ComicImg', function (req, res, next) {
         api_key: Keys.COMIC_VINE_KEY,
         query: req.body.comicName + ' ' + req.body.comicID,
         format: 'json',
-        resource_type: 'issue',
-      },
+        resource_type: 'issue'
+      }
     })
     .then((data) => {
-      res.send(data.data.results);
+      res.send(data.data.results)
     })
-    .catch();
-});
+    .catch()
+})
 
 router.post('/MarvelImg', function (req, res, next) {
-  const diamond_id = req.body.comicID;
+  const diamond_id = req.body.comicID
   mahvel(
     'comics',
     {
@@ -71,19 +70,19 @@ router.post('/MarvelImg', function (req, res, next) {
         limit: 5,
         diamondCode: diamond_id,
         orderBy: '-onsaleDate',
-        noVariants: true,
-      },
+        noVariants: true
+      }
     },
     function (err, body) {
       if (err) {
-        console.log(err);
-      } else res.send(body);
-    },
-  );
-});
+        console.log(err)
+      } else res.send(body)
+    }
+  )
+})
 
 router.post('/MarvelQuery', function (req, res, next) {
-  const diamond_id = req.body.comicID;
+  const diamond_id = req.body.comicID
   mahvel(
     'comics',
     {
@@ -94,18 +93,18 @@ router.post('/MarvelQuery', function (req, res, next) {
         limit: 5,
         diamondCode: diamond_id,
         orderBy: '-onsaleDate',
-        noVariants: true,
-      },
+        noVariants: true
+      }
     },
     function (err, body) {
-      if (err) throw err;
-      else res.send(body);
-    },
-  );
-});
+      if (err) throw err
+      else res.send(body)
+    }
+  )
+})
 
 router.post('/ComicVineQuery', function (req, res, next) {
-  const { comicName, comicID, comicTitle, comicDate } = req.body;
+  const { comicName, comicID, comicTitle, comicDate } = req.body
   axios
     .get('https://comicvine.gamespot.com/api/search/', {
       params: {
@@ -120,69 +119,69 @@ router.post('/ComicVineQuery', function (req, res, next) {
           comicDate +
           ' comic',
         format: 'json',
-        resource_type: 'issue',
-      },
+        resource_type: 'issue'
+      }
     })
     .then((data) => {
-      res.send(data.data);
+      res.send(data.data)
     })
-    .catch();
-});
+    .catch()
+})
 
 router.get('/marvelComics', async (req, res) => {
-  const marvelDiamondIDs = await filterMarvelDiamondIDs(req.query.offset);
+  const marvelDiamondIDs = await filterMarvelDiamondIDs(req.query.offset)
   Promise.all(
     marvelDiamondIDs.map(async (diamondID) => {
-      const c = await marvelApiComicQuery(diamondID);
-      return c;
-    }),
+      const c = await marvelApiComicQuery(diamondID)
+      return c
+    })
   ).then((comics) => {
-    res.send(comics);
-  });
-});
+    res.send(comics)
+  })
+})
 
 const marvelApiComicQuery = (diamondID) => {
-  const baseUrl = 'http://gateway.marvel.com/v1/public/comics';
-  const query = '?diamondCode=' + diamondID;
-  const timestamp = new Date().getTime();
+  const baseUrl = 'http://gateway.marvel.com/v1/public/comics'
+  const query = '?diamondCode=' + diamondID
+  const timestamp = new Date().getTime()
   const hash = crypto
     .createHash('md5')
     .update(timestamp + Keys.MARVEL_KEY_LONG + Keys.MARVEL_KEY_SHORT)
-    .digest('hex');
-  const auth = `&ts=${timestamp}&apikey=${Keys.MARVEL_KEY_SHORT}&hash=${hash}`;
-  const url = `${baseUrl}${query}${auth}`;
+    .digest('hex')
+  const auth = `&ts=${timestamp}&apikey=${Keys.MARVEL_KEY_SHORT}&hash=${hash}`
+  const url = `${baseUrl}${query}${auth}`
 
   return axios.get(url).then((comics) => {
     if (comics.data.data.total > 0) {
-      return comics.data.data.results[0];
+      return comics.data.data.results[0]
     } else {
-      return null;
+      return null
     }
-  });
-};
+  })
+}
 
 const filterMarvelDiamondIDs = async (offset) => {
-  const comicData = await getPreviewData(offset);
-  const lines = comicData.split('\r\n');
-  let i = 0;
+  const comicData = await getPreviewData(offset)
+  const lines = comicData.split('\r\n')
+  let i = 0
   while (lines[i] != 'MARVEL COMICS') {
-    i++;
+    i++
   }
-  i += 2;
-  const diamondIDS = [];
+  i += 2
+  const diamondIDS = []
   while (lines[i] != '') {
-    diamondIDS.push(lines[i].substring(0, 9));
-    i++;
+    diamondIDS.push(lines[i].substring(0, 9))
+    i++
   }
-  return diamondIDS;
-};
+  return diamondIDS
+}
 
 const getPreviewData = async (off) => {
   const uri =
-    'https://www.previewsworld.com/NewReleases/Export?format=txt&releaseDate=';
-  var today = new Date();
-  today.setDate(today.getDate() + off + ((3 - 1 - today.getDay() + 7) % 7) + 1);
-  let previewRes = await axios.get(uri + today);
-  return previewRes.data;
-};
-module.exports = router;
+    'https://www.previewsworld.com/NewReleases/Export?format=txt&releaseDate='
+  var today = new Date()
+  today.setDate(today.getDate() + off + ((3 - 1 - today.getDay() + 7) % 7) + 1)
+  let previewRes = await axios.get(uri + today)
+  return previewRes.data
+}
+module.exports = router
