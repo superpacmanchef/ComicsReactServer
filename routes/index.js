@@ -58,27 +58,10 @@ router.post('/ComicImg', function (req, res, next) {
     .catch()
 })
 
-router.post('/MarvelImg', function (req, res, next) {
+router.post('/MarvelImg', async (req, res, next) => {
   const diamond_id = req.body.comicID
-  mahvel(
-    'comics',
-    {
-      publicKey: Keys.MARVEL_KEY_SHORT,
-      privateKey: Keys.MARVEL_KEY_LONG,
-      timeout: 4000,
-      query: {
-        limit: 5,
-        diamondCode: diamond_id,
-        orderBy: '-onsaleDate',
-        noVariants: true
-      }
-    },
-    function (err, body) {
-      if (err) {
-        console.log(err)
-      } else res.send(body)
-    }
-  )
+  const c = await marvelApiComicQuery(diamond_id)
+  res.send(c)
 })
 
 router.post('/MarvelQuery', function (req, res, next) {
