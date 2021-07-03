@@ -1,5 +1,4 @@
 const { MongoClient, ObjectID } = require('mongodb')
-const Keys = require('../keys')
 class DAO {
   constructor() {
     //   if (dbfilepath) {
@@ -9,7 +8,8 @@ class DAO {
     //     //in memory
     //     this.db = new Datastore();
     //   }
-    const connectionString = Keys.MONGOLINK
+    console.log(process.env.MONGOLINK)
+    const connectionString = process.env.MONGOLINK
     MongoClient.connect(
       connectionString,
       { useUnifiedTopology: true },

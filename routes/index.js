@@ -2,7 +2,6 @@ var express = require('express')
 var router = express.Router()
 const axios = require('axios')
 const crypto = require('crypto')
-const Keys = require('../keys')
 
 router.post('/NewComics', async function (req, res, next) {
   const week = req.body.week
@@ -46,7 +45,7 @@ router.post('/ComicImg', function (req, res, next) {
   axios
     .get('https://comicvine.gamespot.com/api/search/', {
       params: {
-        api_key: Keys.COMIC_VINE_KEY,
+        api_key: process.env.COMIC_VINE_KEY,
         query: req.body.comicName + ' ' + req.body.comicID,
         format: 'json',
         resource_type: 'issue'
@@ -69,8 +68,8 @@ router.post('/MarvelQuery', function (req, res, next) {
   mahvel(
     'comics',
     {
-      publicKey: Keys.MARVEL_KEY_SHORT,
-      privateKey: Keys.MARVEL_KEY_LONG,
+      publicKey: process.env.MARVEL_KEY_SHORT,
+      privateKey: process.env.MARVEL_KEY_LONG,
       timeout: 4000,
       query: {
         limit: 5,
@@ -91,7 +90,7 @@ router.post('/ComicVineQuery', function (req, res, next) {
   axios
     .get('https://comicvine.gamespot.com/api/search/', {
       params: {
-        api_key: Keys.COMIC_VINE_KEY,
+        api_key: process.env.COMIC_VINE_KEY,
         query:
           comicName +
           ' ' +
@@ -129,9 +128,11 @@ const marvelApiComicQuery = (diamondID) => {
   const timestamp = new Date().getTime()
   const hash = crypto
     .createHash('md5')
-    .update(timestamp + Keys.MARVEL_KEY_LONG + Keys.MARVEL_KEY_SHORT)
+    .update(
+      timestamp + process.env.MARVEL_KEY_LONG + process.env.MARVEL_KEY_SHORT
+    )
     .digest('hex')
-  const auth = `&ts=${timestamp}&apikey=${Keys.MARVEL_KEY_SHORT}&hash=${hash}`
+  const auth = `&ts=${timestamp}&apikey=${process.env.MARVEL_KEY_SHORT}&hash=${hash}`
   const url = `${baseUrl}${query}${auth}`
 
   return axios.get(url).then((comics) => {
