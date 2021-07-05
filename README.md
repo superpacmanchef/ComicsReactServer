@@ -1,11 +1,19 @@
 # Comics React Server
 A express app which serves the last and current weeks comic releases from a API and can obtain ther cover image for a comic from another API.
 
+Comic releases obtained from : [ShortBoxed API](https://api.shortboxed.com/)
+
+Marvel comic data and cover images obtained from : [Marvel Comic API](https://developer.marvel.com/)
+
+Non Marvel comic data and cover images obtainaed form : [Comic Vine API](https://comicvine.gamespot.com/api/)
+
 ## Built With 
 * Node
 * Express
 * Axios
 * Passport
+
+## 
 
 ## Installation
 
