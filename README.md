@@ -20,7 +20,7 @@ Non Marvel comic data and cover images obtainaed form : [Comic Vine API](https:/
 Create a .env file with the following variables :
 - COMIC_VINE_KEY - place your ComicVine api key here 
 - MARVEL_KEY_LONG - place your marvel comic api private key here
-- MARVLE KEY SHORT - place your marvel comic api public key here
+- MARVLE_KEY_SHORT - place your marvel comic api public key here
 - MONGOLINK - place your link to your mongo database here
 
 ```
