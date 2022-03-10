@@ -30,7 +30,6 @@ router.post('/', isLoged, async (req, res) => {
 
 router.delete('/', isLoged, async (req, res) => {
     const { comic } = req.body
-    console.log(comic)
     try {
         const pullList = await dao.removePull(req.user._id, comic)
         if (pullList) {

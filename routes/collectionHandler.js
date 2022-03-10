@@ -28,7 +28,6 @@ router.post('/', isLoged, async (req, res) => {
 
 router.delete('/', isLoged, async (req, res) => {
     const { diamond_id } = req.body
-    console.log(diamond_id)
     try {
         const collection = await dao.removeCollection(req.user._id, diamond_id)
         if (collection) {

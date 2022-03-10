@@ -13,9 +13,6 @@ const saltRound = 10
 router.post('/register', async (req, res) => {
     const { email, username, password, passwordRepeat } = req.body
     try {
-        if (password !== passwordRepeat) {
-            throw new Error()
-        }
         const userExist = await dao.searchByEmail(email)
         if (userExist !== null) {
             throw new Error()

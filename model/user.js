@@ -3,14 +3,6 @@ const dotenv = require('dotenv')
 dotenv.config()
 class DAO {
     constructor() {
-        //   if (dbfilepath) {
-        //     this.db = new Datastore({ filename: dbfilepath, autoload: true });
-        //     console.log("\n>>>>> DB connected to file: ", dbfilepath);
-        //   } else {
-        //     //in memory
-        //     this.db = new Datastore();
-        //   }
-        console.log(process.env.MONGO_LINK)
         const connectionString = process.env.MONGO_LINK
         MongoClient.connect(
             connectionString,
@@ -23,30 +15,19 @@ class DAO {
         )
     }
 
-    /* 
-  all() {
-    return new Promise((resolve, response) => {
-      this.db.find({}, function (err, entries) {
-        if (err) {
-          reject(err);
-          console.log(`error ${err}`);
-        } else {
-          resolve(entries);
-          console.log('resolved');
-        }
-      });
-    });
-  }
- */
-
     async insertUser(username, email, password) {
-        this.db.collection('users').insertOne({
-            username: username,
-            email: email,
-            password: password,
-            pullList: [],
-            collection: [],
-        })
+        try {
+            this.db.collection('users').insertOne({
+                username: username,
+                email: email,
+                password: password,
+                pullList: [],
+                collection: [],
+            })
+            return true
+        } catch (err) {
+            return false
+        }
     }
 
     async insertCollection(id, comic) {
@@ -107,10 +88,10 @@ class DAO {
         })
     }
 
-    searchByUsername(username) {
+    searchByEmail(username) {
         return this.db
             .collection('users')
-            .findOne({ username: username })
+            .findOne({ email: username })
             .then((entries) => {
                 return entries
             })

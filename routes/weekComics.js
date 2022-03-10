@@ -6,7 +6,6 @@ const comicTitleSplit = require('../lib/comicTitleSplit')
 
 router.get('/', async (req, res) => {
     const { week } = req.query
-    console.log(week)
     const url = 'http://api.shortboxed.com'
     let ext = ''
 
