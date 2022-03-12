@@ -55,8 +55,7 @@ const getComicData = async (
             `https://metron.cloud/api/issue/${metronComicID}`,
             {
                 headers: {
-                    Authorization:
-                        'BASIC c3VwZXJwYWNtYW5jaGVmOktOSE14TUM0Sm1lUHhrSA==',
+                    Authorization: `${process.env.METRON_BASIC_KEY}`,
                 },
             }
         )
