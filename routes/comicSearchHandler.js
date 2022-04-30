@@ -83,7 +83,6 @@ router.post('/', isLoged, async (req, res) => {
             comicID,
             comicUPC
         )
-        console.log(data)
         if (data === null) {
             res.sendStatus(500)
         } else {
