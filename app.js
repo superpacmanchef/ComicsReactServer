@@ -25,7 +25,6 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
-app.set('port', process.env.PORT || 3000)
 
 app.use(session({ secret: 'XASDASDAAA' }))
 app.use(passport.initialize())
@@ -78,7 +77,4 @@ app.use(function (req, res, next) {
     next()
 })
 
-app.listen(app.get('port'), function () {
-    console.log('>>> Server Started\n')
-    console.log(app.get('port'))
-})
+app.listen(process.env.PORT || 3000)
