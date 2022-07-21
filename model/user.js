@@ -40,12 +40,13 @@ class DAO {
                 comic.id
             ).then(async (res) => {
                 if (res == 1) {
-                    this.db.collection('users').updateOne(
+                    await this.db.collection('users').updateOne(
                         { _id: id },
                         {
                             $push: { collection: comic },
                         }
                     )
+
                     const res = await this.searchByID(id)
                     resolve(res.collection)
                 } else {
@@ -54,10 +55,9 @@ class DAO {
             })
         })
     }
-
     async removeCollection(id, diamond_id) {
         return new Promise(async (resolve, reject) => {
-            this.db.collection('users').updateOne(
+            await this.db.collection('users').updateOne(
                 { _id: id },
                 {
                     $pull: {

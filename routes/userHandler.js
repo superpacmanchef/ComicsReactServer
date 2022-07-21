@@ -6,6 +6,7 @@ var isLoged = require('../middlware/isLoged')
 var dao = require('../model/user')
 var passport = require('passport')
 var bcrypt = require('bcrypt')
+const { del } = require('request')
 dotenv.config()
 
 const saltRound = 10
@@ -34,12 +35,15 @@ router.post('/register', async (req, res) => {
 })
 
 router.post('/login', passport.authenticate('local'), async (req, res) => {
+    delete req.user.pasword
+    delete req.user._id
     res.json({ user: req.user })
 })
 
-router.get('/username', isLoged, (req, res) => {
-    const { username } = req.user
-    res.json({ user: { username } })
+router.get('/', isLoged, (req, res) => {
+    delete req.user.password
+    delete req.user._id
+    res.json({ user: req.user })
 })
 
 module.exports = router

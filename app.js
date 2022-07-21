@@ -69,7 +69,7 @@ app.use('/weekComics', weekComics)
 app.use('/comicSearchHandler', comicSearchHandler)
 
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*') // update to match the domain you will make the request from
+    res.header('Access-Control-Allow-Origin', 'localhost:8081') // update to match the domain you will make the request from
     res.header(
         'Access-Control-Allow-Headers',
         'Origin, X-Requested-With, Content-Type, Accept'
